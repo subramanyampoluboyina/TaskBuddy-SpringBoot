@@ -1,4 +1,4 @@
-package com.TaskBuddy.TaskBuddy;
+package com.example.TaskBuddy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,8 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TaskBuddyApplication {
 
 	public static void main(String[] args) {
-        System.setProperty("spring.classformat.ignore", "true");
-        org.springframework.boot.SpringApplication.run(TaskBuddyApplication.class, args);
+		SpringApplication.run(TaskBuddyApplication.class, args);
 	}
 
 }
