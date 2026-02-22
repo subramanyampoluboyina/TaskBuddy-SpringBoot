@@ -1,4 +1,4 @@
-package com.example.TaskBuddy;
+package com.example.TaskBuddySpringBoot;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

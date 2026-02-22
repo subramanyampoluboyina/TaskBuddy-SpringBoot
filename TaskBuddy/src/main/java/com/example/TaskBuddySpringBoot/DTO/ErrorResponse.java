@@ -1,4 +1,4 @@
-package com.example.TaskBuddy.DTO;
+package com.example.TaskBuddySpringBoot.DTO;
 
 import lombok.Data;
 

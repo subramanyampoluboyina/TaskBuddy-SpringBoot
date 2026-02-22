@@ -1,18 +1,14 @@
-package com.example.TaskBuddy.Controller;
+package com.example.TaskBuddySpringBoot.Controller;
 
-import com.example.TaskBuddy.DTO.APIResponse;
-import com.example.TaskBuddy.DTO.DocumentDTO;
-import com.example.TaskBuddy.DTO.TaskDTO;
-import com.example.TaskBuddy.DTO.TaskWithDocuments;
-import com.example.TaskBuddy.Entity.Document;
-import com.example.TaskBuddy.Entity.Task;
-import com.example.TaskBuddy.Service.TaskService;
+import com.example.TaskBuddySpringBoot.DTO.APIResponse;
+import com.example.TaskBuddySpringBoot.DTO.TaskDTO;
+import com.example.TaskBuddySpringBoot.DTO.TaskWithDocuments;
+import com.example.TaskBuddySpringBoot.Service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController

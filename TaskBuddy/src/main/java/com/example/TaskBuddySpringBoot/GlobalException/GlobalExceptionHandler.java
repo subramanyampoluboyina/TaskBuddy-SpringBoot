@@ -1,6 +1,6 @@
-package com.example.TaskBuddy.GlobalException;
+package com.example.TaskBuddySpringBoot.GlobalException;
 
-import com.example.TaskBuddy.DTO.ErrorResponse;
+import com.example.TaskBuddySpringBoot.DTO.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,8 +1,11 @@
-package com.example.TaskBuddy.DTO;
+package com.example.TaskBuddySpringBoot.DTO;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DocumentDTO {
     private int id;
     private String documentName;
