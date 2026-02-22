@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ActivityDAO extends JpaRepository<Activity, Number> {
-    @Query(value = "SELECT * FROM Activities WHERE TaskId = :taskId",nativeQuery = true)
+    @Query(value = "SELECT * FROM Activities WHERE TaskId = :taskId ORDER BY CreatedDate",nativeQuery = true)
     List<Activity> getActivitiesByTaskId(@Param("taskId") int taskId);
 }

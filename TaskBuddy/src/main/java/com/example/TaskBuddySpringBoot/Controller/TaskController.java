@@ -1,15 +1,18 @@
 package com.example.TaskBuddySpringBoot.Controller;
 
-import com.example.TaskBuddySpringBoot.DTO.APIResponse;
-import com.example.TaskBuddySpringBoot.DTO.TaskDTO;
-import com.example.TaskBuddySpringBoot.DTO.TaskWithDocuments;
+import com.example.TaskBuddySpringBoot.DTO.*;
 import com.example.TaskBuddySpringBoot.Service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("Task")
@@ -58,4 +61,9 @@ public class TaskController {
         return new ResponseEntity<>(new APIResponse("Success","Task status updated successfully",null),HttpStatus.OK);
     }
 
+    @GetMapping("GetActivities")
+    public ResponseEntity<?> GetActivities(@RequestParam int taskId){
+        List<ActivityResponse> activities = taskService.GetActivities(taskId);
+        return new ResponseEntity<>(new APIResponse("Success","Task status updated successfully",activities),HttpStatus.OK);
+    }
 }

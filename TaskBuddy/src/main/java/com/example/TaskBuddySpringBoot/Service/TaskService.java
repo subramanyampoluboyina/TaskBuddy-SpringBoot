@@ -3,10 +3,7 @@ package com.example.TaskBuddySpringBoot.Service;
 import com.example.TaskBuddySpringBoot.DAO.ActivityDAO;
 import com.example.TaskBuddySpringBoot.DAO.DocumentDAO;
 import com.example.TaskBuddySpringBoot.DAO.TaskDAO;
-import com.example.TaskBuddySpringBoot.DTO.ActivityDTO;
-import com.example.TaskBuddySpringBoot.DTO.DocumentDTO;
-import com.example.TaskBuddySpringBoot.DTO.TaskDTO;
-import com.example.TaskBuddySpringBoot.DTO.TaskWithDocuments;
+import com.example.TaskBuddySpringBoot.DTO.*;
 import com.example.TaskBuddySpringBoot.Entity.Activity;
 import com.example.TaskBuddySpringBoot.Entity.Document;
 import com.example.TaskBuddySpringBoot.Entity.Task;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -118,19 +116,19 @@ public class TaskService {
 
             //Update Activity
             if(!Objects.equals(taskWithDocuments.getTitle(), task.getTitle())){
-                UpdateActivity(new ActivityDTO("title", taskWithDocuments.getTitle(), task.getTitle()),task);
+                UpdateActivity(new ActivityDTO("title", task.getTitle(), taskWithDocuments.getTitle()),task);
             }
             if(!Objects.equals(taskWithDocuments.getDescription(), task.getDescription())){
-                UpdateActivity(new ActivityDTO("description", taskWithDocuments.getDescription(), task.getDescription()),task);
+                UpdateActivity(new ActivityDTO("description", task.getDescription(), taskWithDocuments.getDescription()),task);
             }
             if(!Objects.equals(taskWithDocuments.getStatus(), task.getStatus())){
-                UpdateActivity(new ActivityDTO("status", taskWithDocuments.getStatus(), task.getStatus()),task);
+                UpdateActivity(new ActivityDTO("status", task.getStatus(), taskWithDocuments.getStatus()),task);
             }
             if(!Objects.equals(taskWithDocuments.getCategory(), task.getCategory())){
-                UpdateActivity(new ActivityDTO("category", taskWithDocuments.getCategory(), task.getCategory()),task);
+                UpdateActivity(new ActivityDTO("category", task.getCategory(), taskWithDocuments.getCategory()),task);
             }
             if(!Objects.equals(taskWithDocuments.getDueDate(), task.getDueDate())){
-                UpdateActivity(new ActivityDTO("dueDate", taskWithDocuments.getDueDate().toString(), task.getDueDate().toString()),task);
+                UpdateActivity(new ActivityDTO("dueDate", task.getDueDate().toLocalDate().toString(), taskWithDocuments.getDueDate().toLocalDate().toString()),task);
             }
 
             task.setTitle(taskWithDocuments.getTitle());
@@ -226,25 +224,91 @@ public class TaskService {
         activity.setTask(task);
 
         activityDAO.save(activity);
-//        if(Objects.equals(activityDTO.getField(), "dueDate")){
-//            activity.setOldValue();
-//        }
     }
 
-    public List<ActivityDTO> GetActivities(int taskId){
+    public List<ActivityResponse> GetActivities(int taskId){
         List<Activity> activities = activityDAO.getActivitiesByTaskId(taskId);
-        List<ActivityDTO> activityDTOList =  new ArrayList<ActivityDTO>();
+//        List<ActivityDTO> activityDTOList =  new ArrayList<ActivityDTO>();
+//        for (Activity activity : activities){
+//            ActivityDTO activityDTO = new ActivityDTO();
+//            activityDTO.setId(activity.getId());
+//            activityDTO.setField(activity.getField());
+//            activityDTO.setOldValue(activity.getOldValue());
+//            activityDTO.setNewValue(activity.getNewValue());
+//            activityDTO.setCreatedDate(activity.getCreatedDate());
+//            activityDTO.setCreatedBy(activity.getCreatedBy());
+//
+//            activityDTOList.add(activityDTO);
+//        }
+        List<ActivityResponse> result =  new ArrayList<ActivityResponse>();
         for (Activity activity : activities){
-            ActivityDTO activityDTO = new ActivityDTO();
-            activityDTO.setId(activity.getId());
-            activityDTO.setField(activity.getField());
-            activityDTO.setOldValue(activity.getOldValue());
-            activityDTO.setNewValue(activity.getNewValue());
-            activityDTO.setCreatedDate(activity.getCreatedDate());
-            activityDTO.setCreatedBy(activity.getCreatedBy());
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd");
+            String date = activity.getCreatedDate().format(dateFormatter);
 
-            activityDTOList.add(activityDTO);
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm a");
+            String time = activity.getCreatedDate().format(timeFormatter);
+            //Task
+            if(Objects.equals(activity.getField(), "task")){
+                if(Objects.equals(activity.getOldValue(), "") && !Objects.equals(activity.getNewValue(), "")){
+                    result.add(new ActivityResponse("You created this task", date, time));
+                }
+                if(!Objects.equals(activity.getOldValue(), "") && Objects.equals(activity.getNewValue(), "")){
+                    result.add(new ActivityResponse("You deleted this task", date, time));
+                }
+            }
+            // region Title
+            if(Objects.equals(activity.getField(), "title")){
+                if(!Objects.equals(activity.getOldValue(), activity.getNewValue())){
+                    result.add(new ActivityResponse("You changed title from "+activity.getOldValue()+" to "+activity.getNewValue(),
+                            date, time));
+                }
+            }
+            // Description
+            if(Objects.equals(activity.getField(), "description")){
+//                if(Objects.equals(activity.getOldValue(), "") && !Objects.equals(activity.getNewValue(), "")){
+//                    result.add(new ActivityResponse("You updated description", activity.getCreatedDate().toLocalDate().toString(), activity.getCreatedDate().toLocalTime().toString()));
+//                }
+//                if(!Objects.equals(activity.getOldValue(), "") && Objects.equals(activity.getNewValue(), "")){
+//                    result.add(new ActivityResponse("You updated description", activity.getCreatedDate().toLocalDate().toString(), activity.getCreatedDate().toLocalTime().toString()));
+//                }
+                if(!Objects.equals(activity.getOldValue(), activity.getNewValue())){
+                    result.add(new ActivityResponse("You updated description",
+                            date, time));
+                }
+            }
+            // Category
+            if(Objects.equals(activity.getField(), "category")){
+                if(!Objects.equals(activity.getOldValue(), activity.getNewValue())){
+                    result.add(new ActivityResponse("You changed category from "+activity.getOldValue()+" to "+activity.getNewValue(),
+                            date, time));
+                }
+            }
+            // Due date
+            if(Objects.equals(activity.getField(), "dueDate")){
+                if(!Objects.equals(activity.getOldValue(), activity.getNewValue())){
+                    result.add(new ActivityResponse("You changed due date from "+activity.getOldValue()+" to "+activity.getNewValue(),
+                            date, time));
+                }
+            }
+            // Status
+            if(Objects.equals(activity.getField(), "status")){
+                if(!Objects.equals(activity.getOldValue(), activity.getNewValue())){
+                    result.add(new ActivityResponse("You changed status from "+activity.getOldValue()+" to "+activity.getNewValue(),
+                            date, time));
+                }
+            }
+            //Document
+            if(Objects.equals(activity.getField(), "document")){
+                if(Objects.equals(activity.getOldValue(), "") && !Objects.equals(activity.getNewValue(),"")){
+                    result.add(new ActivityResponse("You uploaded "+activity.getNewValue()+" file",
+                            date, time));
+                }
+                if(!Objects.equals(activity.getOldValue(), "") && Objects.equals(activity.getNewValue(),"")){
+                    result.add(new ActivityResponse("You deleted "+activity.getOldValue()+" file",
+                            date, time));
+                }
+            }
         }
-        return activityDTOList;
+        return result;
     }
 }
