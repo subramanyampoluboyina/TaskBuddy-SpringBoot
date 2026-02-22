@@ -1,4 +1,4 @@
-package com.example.TaskBuddy;
+package com.example.TaskBuddySpringBoot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

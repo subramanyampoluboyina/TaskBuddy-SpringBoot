@@ -1,15 +1,15 @@
-package com.example.TaskBuddy.Service;
+package com.example.TaskBuddySpringBoot.Service;
 
-import com.example.TaskBuddy.DAO.ActivityDAO;
-import com.example.TaskBuddy.DAO.DocumentDAO;
-import com.example.TaskBuddy.DAO.TaskDAO;
-import com.example.TaskBuddy.DTO.ActivityDTO;
-import com.example.TaskBuddy.DTO.DocumentDTO;
-import com.example.TaskBuddy.DTO.TaskDTO;
-import com.example.TaskBuddy.DTO.TaskWithDocuments;
-import com.example.TaskBuddy.Entity.Activity;
-import com.example.TaskBuddy.Entity.Document;
-import com.example.TaskBuddy.Entity.Task;
+import com.example.TaskBuddySpringBoot.DAO.ActivityDAO;
+import com.example.TaskBuddySpringBoot.DAO.DocumentDAO;
+import com.example.TaskBuddySpringBoot.DAO.TaskDAO;
+import com.example.TaskBuddySpringBoot.DTO.ActivityDTO;
+import com.example.TaskBuddySpringBoot.DTO.DocumentDTO;
+import com.example.TaskBuddySpringBoot.DTO.TaskDTO;
+import com.example.TaskBuddySpringBoot.DTO.TaskWithDocuments;
+import com.example.TaskBuddySpringBoot.Entity.Activity;
+import com.example.TaskBuddySpringBoot.Entity.Document;
+import com.example.TaskBuddySpringBoot.Entity.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TaskService {
@@ -31,6 +32,7 @@ public class TaskService {
         this.activityDAO = activityDAO;
     }
 
+    @Transactional
     public Task AddTask(TaskWithDocuments taskWithDocuments){
         Task task = new Task();
         task.setTitle(taskWithDocuments.getTitle());
@@ -39,7 +41,9 @@ public class TaskService {
         task.setCategory(taskWithDocuments.getCategory());
         task.setDueDate(taskWithDocuments.getDueDate());
         task.setIsActive(true);
+
         Task result = taskDao.save(task);
+        UpdateActivity(new ActivityDTO("task","", result.getTitle()), result);
 
         for(DocumentDTO documentsDto : taskWithDocuments.getDocuments()){
             Document document = new Document();
@@ -49,6 +53,7 @@ public class TaskService {
             document.setDocumentSize(documentsDto.getDocumentSize());
             document.setIsActive(true);
             document.setTask(result);
+            UpdateActivity(new ActivityDTO("document","",documentsDto.getDocumentName()), task);
 
             documentDAO.save(document);
         }
@@ -106,9 +111,28 @@ public class TaskService {
         }
     }
 
+    @Transactional
     public TaskWithDocuments UpdateTask(TaskWithDocuments taskWithDocuments){
         try{
             Task task = taskDao.findById(taskWithDocuments.getId()).orElseThrow(()-> new Exception("Task not found"));
+
+            //Update Activity
+            if(!Objects.equals(taskWithDocuments.getTitle(), task.getTitle())){
+                UpdateActivity(new ActivityDTO("title", taskWithDocuments.getTitle(), task.getTitle()),task);
+            }
+            if(!Objects.equals(taskWithDocuments.getDescription(), task.getDescription())){
+                UpdateActivity(new ActivityDTO("description", taskWithDocuments.getDescription(), task.getDescription()),task);
+            }
+            if(!Objects.equals(taskWithDocuments.getStatus(), task.getStatus())){
+                UpdateActivity(new ActivityDTO("status", taskWithDocuments.getStatus(), task.getStatus()),task);
+            }
+            if(!Objects.equals(taskWithDocuments.getCategory(), task.getCategory())){
+                UpdateActivity(new ActivityDTO("category", taskWithDocuments.getCategory(), task.getCategory()),task);
+            }
+            if(!Objects.equals(taskWithDocuments.getDueDate(), task.getDueDate())){
+                UpdateActivity(new ActivityDTO("dueDate", taskWithDocuments.getDueDate().toString(), task.getDueDate().toString()),task);
+            }
+
             task.setTitle(taskWithDocuments.getTitle());
             task.setDescription(taskWithDocuments.getDescription());
             task.setStatus(taskWithDocuments.getStatus());
@@ -116,11 +140,21 @@ public class TaskService {
             task.setDueDate(taskWithDocuments.getDueDate());
             taskDao.save(task);
 
-            List<Document> documents = documentDAO.getDocumentsByTaskId(taskWithDocuments.getId());
-            
-            documentDAO.deleteAll(documents);
+            //Update Document
+            List<Document> allDocuments = documentDAO.getDocumentsByTaskId(taskWithDocuments.getId()).stream().toList();
+            List<Integer> existedDocuments = taskWithDocuments.getDocuments().stream().map(DocumentDTO::getId).filter(id -> id != 0).toList();
+            List<DocumentDTO> newDocuments = taskWithDocuments.getDocuments().stream().filter(d->d.getId() == 0).toList();
+            List<Document> toBeDeletedDocuments = allDocuments.stream()
+                    .filter(d->!existedDocuments.contains(d.getId())).toList();
 
-            for(DocumentDTO documentsDto : taskWithDocuments.getDocuments()){
+            if(!toBeDeletedDocuments.isEmpty()){
+                for (Document doc : toBeDeletedDocuments){
+                    UpdateActivity(new ActivityDTO("document", doc.getDocumentName(), ""), task);
+                    documentDAO.delete(doc);
+                }
+            }
+
+            for(DocumentDTO documentsDto : newDocuments){
                 Document document = new Document();
                 document.setDocumentName(documentsDto.getDocumentName());
                 document.setBase64Content(documentsDto.getBase64Content());
@@ -128,6 +162,7 @@ public class TaskService {
                 document.setDocumentSize(documentsDto.getDocumentSize());
                 document.setIsActive(true);
                 document.setTask(task);
+                UpdateActivity(new ActivityDTO("document","", documentsDto.getDocumentName()), task);
                 documentDAO.save(document);
             }
             return taskWithDocuments;
@@ -145,8 +180,7 @@ public class TaskService {
                 if(!status.isBlank()){
 
                     // Update Activity
-                    ActivityDTO activityDTO = new ActivityDTO("status", task.getStatus(), status);
-                    UpdateActivity(activityDTO, task);
+                    UpdateActivity(new ActivityDTO("status", task.getStatus(), status), task);
 
                     task.setStatus(status);
                     taskDao.save(task);

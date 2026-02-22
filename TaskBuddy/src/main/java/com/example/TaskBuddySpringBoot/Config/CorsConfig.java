@@ -1,4 +1,4 @@
-package com.example.TaskBuddy.Config;
+package com.example.TaskBuddySpringBoot.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

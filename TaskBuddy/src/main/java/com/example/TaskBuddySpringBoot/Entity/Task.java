@@ -1,4 +1,4 @@
-package com.example.TaskBuddy.Entity;
+package com.example.TaskBuddySpringBoot.Entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

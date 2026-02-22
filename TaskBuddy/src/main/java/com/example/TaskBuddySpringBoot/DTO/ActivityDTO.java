@@ -1,7 +1,5 @@
-package com.example.TaskBuddy.DTO;
+package com.example.TaskBuddySpringBoot.DTO;
 
-import com.example.TaskBuddy.Entity.Task;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
